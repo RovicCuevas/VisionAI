@@ -1,17 +1,34 @@
-import { imageToBase64 } from "@/lib/gemini";
+import { analyzeImage, imageToBase64 } from "@/lib/gemini";
 import { router, useLocalSearchParams } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function PreviewScreen() {
   const { photoUri } = useLocalSearchParams<{ photoUri: string }>();
 
-  async function testBase64() {
+  async function handleAnalyze() {
     if (!photoUri) return;
 
-    const base64 = await imageToBase64(photoUri);
+    try {
+      // Convert image to Base64
+      const base64Image = await imageToBase64(photoUri);
 
-    console.log("Base64 Length:", base64.length);
-    console.log("First 100 chars:", base64.substring(0, 100));
+      console.log("Base64 Length:", base64Image.length);
+
+      // Send image to Gemini
+      const result = await analyzeImage(base64Image);
+
+      console.log("Gemini Response:", result);
+
+      // Go to Result screen
+      router.push({
+        pathname: "/result",
+        params: {
+          base64Image,
+        },
+      });
+    } catch (error) {
+      console.error("Analyze Error:", error);
+    }
   }
 
   return (
@@ -30,23 +47,10 @@ export default function PreviewScreen() {
           <Text style={styles.buttonText}>Retake</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.analyzeButton}
-          onPress={() =>
-            router.push({
-              pathname: "/result",
-              params: { photoUri },
-            })
-          }
-        >
+        <TouchableOpacity style={styles.analyzeButton} onPress={handleAnalyze}>
           <Text style={styles.buttonText}>Analyze</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Temporary test button for Phase 4.2 */}
-      <TouchableOpacity style={styles.testButton} onPress={testBase64}>
-        <Text style={styles.buttonText}>Test Base64</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -80,15 +84,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 14,
     borderRadius: 8,
-  },
-
-  testButton: {
-    alignSelf: "center",
-    backgroundColor: "#2563EB",
-    paddingHorizontal: 30,
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginBottom: 30,
   },
 
   buttonText: {
