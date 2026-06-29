@@ -1,4 +1,4 @@
-import { analyzeImage, imageToBase64 } from "@/lib/gemini";
+import { imageToBase64 } from "@/lib/gemini";
 import { router, useLocalSearchParams } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -14,12 +14,7 @@ export default function PreviewScreen() {
 
       console.log("Base64 Length:", base64Image.length);
 
-      // Send image to Gemini
-      const result = await analyzeImage(base64Image);
-
-      console.log("Gemini Response:", result);
-
-      // Go to Result screen
+      // Navigate to Result screen
       router.push({
         pathname: "/result",
         params: {
