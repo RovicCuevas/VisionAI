@@ -1,4 +1,4 @@
-import { ANALYSIS_PROMPT, analyzeImage } from "@/lib/gemini";
+import { PROMPTS, analyzeImage } from "@/lib/gemini";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -17,8 +17,9 @@ type AnalysisResult = {
 };
 
 export default function ResultScreen() {
-  const { base64Image } = useLocalSearchParams<{
+  const { base64Image, promptKey } = useLocalSearchParams<{
     base64Image: string;
+    promptKey: string;
   }>();
 
   const [loading, setLoading] = useState(true);
@@ -36,9 +37,12 @@ export default function ResultScreen() {
       setLoading(true);
       setError("");
 
+      const selectedPrompt =
+        PROMPTS[promptKey as keyof typeof PROMPTS] ?? PROMPTS.academic;
+
       const response = await analyzeImage(
         base64Image as string,
-        ANALYSIS_PROMPT,
+        selectedPrompt,
       );
 
       console.log("========== GEMINI RESPONSE ==========");
@@ -58,7 +62,7 @@ export default function ResultScreen() {
         throw new Error("Gemini returned an empty response.");
       }
 
-      // Remove markdown if Gemini wraps the JSON
+      // Remove markdown if Gemini wraps JSON
       text = text
         .replace(/```json/g, "")
         .replace(/```/g, "")
@@ -82,6 +86,15 @@ export default function ResultScreen() {
     }
   }
 
+  const analysisTitle =
+    promptKey === "academic"
+      ? "Academic Analysis"
+      : promptKey === "safety"
+        ? "Safety Analysis"
+        : promptKey === "inventory"
+          ? "Inventory Analysis"
+          : "Analysis Result";
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -101,7 +114,7 @@ export default function ResultScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Analysis Result</Text>
+      <Text style={styles.title}>{analysisTitle}</Text>
 
       <Text style={styles.heading}>Objects</Text>
 
@@ -125,8 +138,10 @@ export default function ResultScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    flexGrow: 1,
     padding: 20,
     paddingTop: 60,
+    backgroundColor: "#F8FAFC",
   },
 
   center: {
@@ -134,6 +149,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: "#F8FAFC",
   },
 
   title: {
@@ -141,6 +157,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 25,
     textAlign: "center",
+    color: "#111827",
   },
 
   heading: {
@@ -153,23 +170,25 @@ const styles = StyleSheet.create({
 
   listItem: {
     fontSize: 16,
-    marginBottom: 5,
+    marginBottom: 6,
     marginLeft: 8,
+    color: "#374151",
   },
 
   body: {
     fontSize: 16,
     lineHeight: 24,
-    color: "#333",
+    color: "#4B5563",
   },
 
   loadingText: {
     marginTop: 15,
     fontSize: 16,
+    color: "#374151",
   },
 
   errorText: {
-    color: "red",
+    color: "#DC2626",
     fontSize: 16,
     textAlign: "center",
   },

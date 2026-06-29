@@ -5,7 +5,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 export default function PreviewScreen() {
   const { photoUri } = useLocalSearchParams<{ photoUri: string }>();
 
-  async function handleAnalyze() {
+  async function goAnalyze(promptKey: string) {
     if (!photoUri) return;
 
     try {
@@ -14,11 +14,12 @@ export default function PreviewScreen() {
 
       console.log("Base64 Length:", base64Image.length);
 
-      // Navigate to Result screen
+      // Navigate to Result screen with selected prompt
       router.push({
         pathname: "/result",
         params: {
           base64Image,
+          promptKey,
         },
       });
     } catch (error) {
@@ -41,9 +42,28 @@ export default function PreviewScreen() {
         >
           <Text style={styles.buttonText}>Retake</Text>
         </TouchableOpacity>
+      </View>
 
-        <TouchableOpacity style={styles.analyzeButton} onPress={handleAnalyze}>
-          <Text style={styles.buttonText}>Analyze</Text>
+      <View style={styles.personaRow}>
+        <TouchableOpacity
+          style={styles.personaButton}
+          onPress={() => goAnalyze("academic")}
+        >
+          <Text style={styles.buttonText}>Academic</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.personaButton}
+          onPress={() => goAnalyze("safety")}
+        >
+          <Text style={styles.buttonText}>Safety</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.personaButton}
+          onPress={() => goAnalyze("inventory")}
+        >
+          <Text style={styles.buttonText}>Inventory</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -62,23 +82,28 @@ const styles = StyleSheet.create({
   },
 
   actionRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    padding: 20,
+    paddingTop: 20,
+    alignItems: "center",
   },
 
   retakeButton: {
     backgroundColor: "#5A6472",
-    paddingHorizontal: 30,
+    paddingHorizontal: 35,
     paddingVertical: 14,
     borderRadius: 8,
   },
 
-  analyzeButton: {
+  personaRow: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    gap: 12,
+  },
+
+  personaButton: {
     backgroundColor: "#5B3FA3",
-    paddingHorizontal: 30,
     paddingVertical: 14,
     borderRadius: 8,
+    alignItems: "center",
   },
 
   buttonText: {
